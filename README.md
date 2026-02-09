@@ -1,18 +1,18 @@
 # dFLWL-EFO: A Forecast-Informed Reservoir Operation Framework Combining Optimal Hedging and Risk Tolerance-Based Operating Rules
 
-This repository supports the manuscript **Balancing Water Supply and Flood Risk for FIRO by Combining Optimal Hedging and Risk Tolerance-Based Operating Rules**, currently under revision for submission to *Journal of Water Resources Planning and Management*.
+This repository supports the manuscript **Balancing Water Supply and Flood Risk for FIRO by Combining Optimal Hedging and Risk Tolerance-Based Operating Rules** published in *Journal of Water Resources Planning and Management*.
 
-This repository contains the source code, datasets, and documentation for implementing the **dFLWL-EFO** framework, developed to enhance real-time Forecast-Informed Reservoir Operations (FIRO) in flood season by integrating optimal hedging policies and risk-tolerance based flood control rules. As a generalizable decision-support tool, dFLWL-EFO allows users to apply the framework to various reservoirs. Users can follow the demonstration example of **Folsom Lake** (California) to prepare input data, define parameters and run model simulations. More information of the framework should be referred to the munuscript.
+This repository contains the source code, datasets, and documentation for implementing the **dFLWL-EFO** framework, developed to enhance real-time Forecast-Informed Reservoir Operations (FIRO) in flood season by integrating optimal hedging policies and risk tolerance-based flood control rules. As a generalizable decision-support tool, dFLWL-EFO allows users to apply the framework to various reservoirs. Users can follow the demonstration example of **Folsom Lake** (California) to prepare input data, define parameters and run model simulations. Further details of the framework are available in the manuscript.
 
 ## Repository Structure
 
 ### `data`
 Processed input data for Folsom Lake:
-- CNRFC_daily_ensemble.rar: zip folder of CSV files of daily-released ensemble forecasts (from 2015-10-01 to 2019-06-30, converted into daily values) retrieved from California Nevada River Forecast Center (CNRFC)
+- CNRFC_daily_ensemble.rar: A compressed folder of CSV files of daily-released ensemble forecasts (from 2015-10-01 to 2019-06-30, converted into daily values) retrieved from California Nevada River Forecast Center (CNRFC)
 - Folsom_observed_operations.csv: Observed inflow, release, storage, and PDSI time series for WYs 1990-2024 
 - Box_Cox_trans_lambda.csv: Calibrated lambda value applied in the Box-Cox transformation (required in implementing BMA model)
 - BMA_paras_7day_horizon.csv: Calibrated BMA model parameters (based on WYs 2015-2019) for the forecast horizon of 7 days (calibrated using R package 'ensembleBMA' externally)
-- EFO_risk_tolerance_curve.csv: risk-tolerance curve (specific risk tolerance levels for each day within 15 days) for EFO implemtation
+- EFO_risk_tolerance_curve.csv: risk tolerance curve (specific risk tolerance levels for each day within 15 days) for EFO implementation
 - Modified_rule_curve.csv: modified storage regulation curve associated with the experiment settings (only used in multi-year operation simulations)
 
 ### `utils`
@@ -40,23 +40,23 @@ This section provides a step-by-step guide to applying the dFLWL-EFO framework t
 
 To run the model, the following datasets must be prepared:
 * Ensemble forecast inflows: Raw, daily-updated ensemble forecasts (separate files for each day)
-* Long-term historical reservoir operation series: Observed inflow series are required to estimate the Box-Cox transformation parameter ($\lambda$), which is used in Bayesian Model Averaging (BMA). Observed release series are needed to derive downstream flood conveyance capacity ($R_{2,max}$, used in dFLWL). 
-* Calibrated parameters of BMA model: `utils/bma_module.py` requires pre-calibrated parameters including ensemble member weights and standard deviations for the selected forecast horizon. For Folsom Lake, those parameters are calibrated using the R package 'ensembleBMA' externally.
-* Risk tolerance curve for EFO implementation: The risk-tolerance curve defines risk tolerance levels for each day within a 15-day horizon. Users can refer to methods from Delaney et al. (2020) and Taylor et al. (2024) to derive these curves for their specific reservoirs.
+* Long-term historical reservoir operation series: Observed inflow series are required to estimate the Box-Cox transformation parameter ($\lambda$) used in Bayesian Model Averaging (BMA). Observed release series are needed to derive downstream flood conveyance capacity ($R_{2,max}$, used in dFLWL. 
+* Calibrated parameters of BMA model: `utils/bma_module.py` requires pre-calibrated parameters including ensemble member weights and standard deviations for the selected forecast horizon. For Folsom Lake, those parameters are calibrated externally using the R package `ensembleBMA`.
+* Risk tolerance curve for EFO implementation: The risk tolerance curve defines risk tolerance levels for each day within a 15-day horizon. Users can refer to methods from Delaney et al. (2020) and Taylor et al. (2024) to derive these curves for their specific reservoirs.
 
-Notably, we use the Generic Data-Driven Reservoir Operation Model (GDROM) (Chen et al., 2022) to approximate daily minimum required release $R_{1,min}$ for meeting water demand. GDROM captures real-world operation rules from historical data through deriving a set of representative operation modules tailored to varying hydroclimatic conditions, based on daily inputs of inflow, initial storage, the day of year (DOY), and Palmer Drought Severity Index (PDSI). For Folsom Lake, GDROM-derived rules are implemented in `utils/gdrom_folsom.py`. For other reservoirs, For other reservoirs, users can either provide GDROM-derived rule sets, use outputs from another reservoir simulation model, or directly supply $R_{1,min}$ time series if available.
+Notably, we use the Generic Data-Driven Reservoir Operation Model (GDROM) (Chen et al., 2022) to approximate daily minimum required release $R_{1,min}$ for meeting water demand. GDROM captures real-world operation rules from historical data through deriving a set of representative operation modules tailored to varying hydroclimatic conditions, based on daily inputs of inflow, initial storage, the day of year (DOY), and Palmer Drought Severity Index (PDSI). For Folsom Lake, GDROM-derived rules are implemented in `utils/gdrom_folsom.py`. For other reservoirs, users can either provide GDROM-derived rule sets, use outputs from another reservoir simulation model, or directly supply $R_{1,min}$ time series if available.
 
 
 ### Step 2: Configure Model Parameters
 
-Key model parameters include those related to real-world release and storage constraints, FIRO policy settings, and model-specific configurations (i.e., the dFLWL model parameters ω, m, $r_a$). The notebook `dFLWL-EFO_demo_flood_season.ipynb` walks through parameter configuration and constraint setting for Folsom Lake. Users should follow this structure to customize settings for a different reservoir.
+Key model parameters include those related to real-world release and storage constraints, FIRO policy settings, and model-specific configurations (e.g., the dFLWL parameters $ω, m, r_a$). The notebook `dFLWL-EFO_demo_flood_season.ipynb` walks through parameter configuration and constraint setting for Folsom Lake. Users should follow this structure to customize settings for a different reservoir.
 
 
 ### Step 3: Run the model
 
 This repository includes all scripts and datasets required to replicate the Folsom Lake case study with a 7-day forecast horizon. 
 To run the model:
-1. Open and execute the notebook `dFLWL-EFO_demo_flood_season.ipynb`, which demonstrates FIRO decision support using dFLWL-EFO during the major flood season of WY 2017. This replicates **Figure 6** in the manuscript.
+1. Open and execute the notebook `dFLWL-EFO_demo_flood_season.ipynb`, which demonstrates FIRO decision support using dFLWL-EFO during the major flood season of WY 2017. This reproduces **Figure 6** in the manuscript.
 2. Modify the input paths and parameters in the notebook to run dFLWL-EFO for your reservoir.
 3. Core functions are modularized and stored in the `utils` directory. Ensure this folder is present when executing notebooks.
 
@@ -67,10 +67,17 @@ To simulate reservoir operations over multiple years, use `multi-year_simulation
 ## License
 This project is licensed under the MIT License.
 
-## Concact
-If you have any questions or would like to contribute, please contact Yanan Chen (yananc3@illinois.edu)
+## Contact
+If you have any questions or would like to contribute, please contact Yanan Chen (yananc2024@outlook.com; yananc3@illinois.edu)
+
+## Citation
+If you use this model, please cite: 
+
+- Chen, Y., Cai, X., Ding, W., & Delaney, C. (Forthcoming). [Balancing Water Supply and Flood Risk for FIRO by Combining Optimal Hedging and Risk Tolerance-Based Operating Rules](https://doi.org/10.1061/JWRMD5/WRENG-7133). *Journal of Water Resources Planning and Management*.
 
 ## References
+- Chen, Y., Cai, X., Ding, W., & Delaney, C. (Forthcoming). [Balancing Water Supply and Flood Risk for FIRO by Combining Optimal Hedging and Risk Tolerance-Based Operating Rules](https://doi.org/10.1061/JWRMD5/WRENG-7133). *Journal of Water Resources Planning and Management*.
+
 - Chen, Y., Li, D., Zhao, Q., & Cai, X. (2022). [Developing a generic data-driven reservoir operation model](https://doi.org/10.1016/j.advwatres.2022.104274). *Advances in Water Resources*, 167, 104274.
 
 - Delaney, C. J., Hartman, R. K., Mendoza, J., Dettinger, M., Delle Monache, L., Jasperse, J., Ralph, F. M., Talbot, C., Brown, J., Reynolds, D., & Evett, S. (2020). [Forecast informed reservoir operations using ensemble streamflow predictions for a multipurpose reservoir in Northern California](https://doi.org/10.1029/2019WR026604). *Water Resources Research*, 56(9), e2019WR026604.
